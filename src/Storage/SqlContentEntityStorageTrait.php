@@ -26,7 +26,7 @@ trait SqlContentEntityStorageTrait {
    * @return string
    *   The class name.
    */
-  protected function getEntityClass($bundle = NULL) {
+  public function getEntityClass(?string $bundle = null): string {
     return $this->entityClassManager()->getEntityClass($this->getEntityType(), $bundle);
   }
 
@@ -127,15 +127,13 @@ trait SqlContentEntityStorageTrait {
     $entity_class = $this->getEntityClass();
     $entity_class::postLoad($this, $entities);
     // Call hook_entity_load().
-    foreach ($this->moduleHandler()->getImplementations('entity_load') as $module) {
-      $function = $module . '_entity_load';
-      $function($entities, $this->entityTypeId);
-    }
+    $this->moduleHandler()->invokeAllWith('entity_load', function (callable $hook, string $module) use (&$entities) {
+      $hook($entities, $this->entityTypeId);
+    });
     // Call hook_TYPE_load().
-    foreach ($this->moduleHandler()->getImplementations($this->entityTypeId . '_load') as $module) {
-      $function = $module . '_' . $this->entityTypeId . '_load';
-      $function($entities);
-    }
+    $this->moduleHandler()->invokeAllWith($this->entityTypeId . '_load', function (callable $hook, string $module) use (&$entities) {
+      $hook($entities);
+    });
   }
 
   /**
@@ -148,7 +146,7 @@ trait SqlContentEntityStorageTrait {
    *   Returns the name of the bundle if specified by its key in $values. If no
    *   bundle key is specified, then NULL is returned.
    */
-  protected function getBundleFromValues(array $values = []) {
+  protected function getBundleFromValues(array $values): ?string {
     return isset($this->bundleKey) && isset($values[$this->bundleKey]) ? $values[$this->bundleKey] : NULL;
   }
 

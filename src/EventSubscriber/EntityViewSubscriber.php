@@ -85,7 +85,7 @@ class EntityViewSubscriber extends EarlyRenderingControllerWrapperSubscriber {
    *   Any non-caught exceptions are passed through.
    */
   public function onController(ControllerEvent $event) {
-    if (!$event->isMasterRequest()) {
+    if (!$event->isMainRequest()) {
       return;
     }
 
@@ -133,7 +133,7 @@ class EntityViewSubscriber extends EarlyRenderingControllerWrapperSubscriber {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     return [
       KernelEvents::CONTROLLER => ['onController'],
     ];
